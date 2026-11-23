@@ -1,7 +1,7 @@
 /*
  * Spark Return for Claude: the spark artwork.
- * Original drawing: every shape is generated at runtime from parameters and a
- * small seeded pseudo-random generator. No external data, no network.
+ * Every shape is generated at runtime from a short table of numbers (one row
+ * per ray). No image files, no external data, no network.
  * Unofficial project, not affiliated with or endorsed by Anthropic.
  *
  * window.SparkReturnArt.still()      -> one 100x100 SVG frame
@@ -35,24 +35,37 @@
   var K = 0.5523; // quarter-circle bezier constant
 
   // ------------------------------------------------------- spark parameters
-  var N = 12;            // number of rays
-  var RMAX = 48;         // longest ray reaches 48 from the centre (2 units from the edge)
-  var HUB = 6.6;         // radius of the solid centre
-  var WB = 5.5;          // half-width of a ray where it leaves the hub
-  var RC = 3.7;          // radius of the rounded tip
+  // Twelve rays. Each ray is a short outline in its own frame: pairs of
+  // (distance from the centre along the ray, distance to the side of it),
+  // from the centre out along one edge, round the tip, and back along the other.
+  // [angle (rad), [r,w, r,w, ...]]
+  var RAYS = [
+    [-1.4125, [0.2,3.5, 23.82,4.09, 42.41,4.9, 44.22,4.44, 46.24,2.45, 47.23,-0.2, 45.64,-1.97, 44.02,-3.42, 43.21,-3.95, 24.02,-2.94, 0.8,-1.51]],
+    [-0.8639, [1.6,11.81, 24.57,8.78, 43.42,7.62, 46.28,6.4, 48.01,4.21, 48.75,0.4, 45.98,-2.98, 43.22,-3.84, 23.77,-3.39, 0.4,-2.14]],
+    [-0.1287, [0.8,8.12, 24.83,5.78, 46.5,3.75, 48.41,0.4, 48.15,-1.1, 45.7,-2.59, 43.78,-2.99, 24.63,-2.04, 0.4,0.33]],
+    [0.2818, [-0.8,5.89, 25.01,4.92, 44.55,3.8, 46.45,3.29, 49.95,0.0, 49.13,-2.7, 46.65,-4.08, 43.95,-5.4, 24.61,-0.77, 0.4,4.49]],
+    [0.7779, [-0.4,6.3, 27.59,3.43, 49.47,1.09, 50.59,0.94, 51.62,0.0, 51.02,-2.11, 49.79,-2.96, 49.07,-3.42, 27.39,-2.63, 0,-2.07]],
+    [1.0436, [0.4,5.86, 26.67,6.18, 44.91,5.0, 48.08,4.33, 49.82,2.5, 50.25,0.0, 49.32,-1.44, 45.91,-3.28, 25.67,-1.97, 0,-2.85]],
+    [1.6334, [0.0,-0.86, 26.17,2.03, 47.39,4.71, 48.97,4.08, 51.22,2.36, 51.55,0.2, 51.02,-1.61, 49.57,-2.79, 47.99,-3.22, 26.97,-4.01, 0.4,-4.98]],
+    [2.1223, [0.4,-1.71, 26.82,1.37, 48.0,3.55, 50.03,3.47, 52.03,2.17, 51.67,-0.2, 50.83,-1.7, 48.8,-3.0, 27.02,-5.02, 0.0,-7.08]],
+    [2.527, [0.6,-0.24, 25.38,2.01, 44.81,3.84, 47.14,3.33, 48.46,1.92, 49.27,0.8, 49.16,-1.94, 46.21,-4.08, 25.38,-4.73, -0.4,-5.76]],
+    [3.1016, [1.6,-1.76, 26.12,1.41, 50.22,4.0, 52.53,2.0, 49.42,-2.25, 27.92,-4.27, 0.0,-6.14]],
+    [-2.5825, [0.4,1.0, 25.31,3.1, 45.62,5.15, 48.48,4.46, 50.69,2.57, 50.95,-0.6, 49.69,-2.35, 48.09,-4.08, 45.42,-5.11, 26.11,-5.64, -0.4,-6.57]],
+    [-2.029, [0.4,4.5, 27.82,3.72, 48.6,4.3, 51.18,3.55, 52.82,1.65, 54.37,-0.4, 52.82,-3.52, 51.18,-6.09, 48.6,-7.43, 27.82,-6.2, -0.8,-5.19]]
+  ];
+  var OX = 1.46, OY = -1.83; // the centre sits slightly off the middle of the box
+  var HUB = 9.84;            // radius of the solid centre
+  var N = RAYS.length;
+  var RMAX = 48;
 
   var BASE = (function () {
-    var rnd = mulberry32(90817);
-    var gaps = [], sum = 0, i;
-    for (i = 0; i < N; i++) { var g = 1 + (rnd() - 0.5) * 0.46; gaps.push(g); sum += g; }
-    var ang = [], a = -Math.PI / 2 + (rnd() - 0.5) * 0.12;
-    for (i = 0; i < N; i++) { ang.push(a); a += (gaps[i] / sum) * TAU; }
-    var raw = [], mn = 9, mx = 0;
-    for (i = 0; i < N; i++) { var v = rnd(); raw.push(v); if (v < mn) mn = v; if (v > mx) mx = v; }
-    var len = [], wf = [];
-    for (i = 0; i < N; i++) {
-      len.push(0.8 + 0.2 * ((raw[i] - mn) / (mx - mn)));
-      wf.push(0.74 + 0.52 * rnd());
+    var ang = [], len = [], wf = [];
+    for (var i = 0; i < N; i++) {
+      var q = RAYS[i][1], far = 0, n = q.length;
+      for (var j = 0; j < n; j += 2) if (q[j] > far) far = q[j];
+      ang.push(RAYS[i][0]);
+      len.push(far / RMAX);
+      wf.push((q[5] - q[n - 3]) / 8);
     }
     return { ang: ang, len: len, wf: wf };
   })();
@@ -60,7 +73,7 @@
   // ------------------------------------------------------------ frame context
   // ctx: { cx, cy, sx, sy } - squash is applied to every emitted point
   function mkCtx(frameIndex, sx, sy) {
-    return { cx: 50, cy: 50 + 100 * frameIndex, sx: sx || 1, sy: sy || 1 };
+    return { cx: 50 + OX, cy: 50 + OY + 100 * frameIndex, sx: sx || 1, sy: sy || 1 };
   }
   function pt(ctx, x, y) {
     return num(ctx.cx + x * ctx.sx) + ' ' + num(ctx.cy + y * ctx.sy);
@@ -90,6 +103,17 @@
     return '<path d="' + d + 'Z"/>';
   }
 
+  // One ray of the spark, stretched along its length by sl and across by sw.
+  function sparkRay(ctx, a, q, sl, sw) {
+    var ux = Math.cos(a), uy = Math.sin(a);
+    var nx = -uy, ny = ux, d = '';
+    for (var j = 0; j < q.length; j += 2) {
+      var r = q[j] * sl, w = q[j + 1] * sw;
+      d += (j ? 'L' : 'M') + pt(ctx, ux * r + nx * w, uy * r + ny * w);
+    }
+    return '<path d="' + d + 'Z"/>';
+  }
+
   function dot(ctx, x, y, r) {
     var cx = num(ctx.cx + x * ctx.sx), cy = num(ctx.cy + y * ctx.sy);
     if (ctx.sx === 1 && ctx.sy === 1) return '<circle cx="' + cx + '" cy="' + cy + '" r="' + num(r) + '"/>';
@@ -101,14 +125,12 @@
   function spark(ctx, o) {
     var s = o.s, ws = o.ws === undefined ? 1 : o.ws, hs = o.hs === undefined ? 1 : o.hs;
     var rot = o.rot || 0, out = '', i;
-    var hub = HUB * hs * ws;
+    var hub = HUB * hs * ws * Math.min(1, 0.35 + 0.65 * s);
     for (i = 0; i < N; i++) {
-      var L = BASE.len[i] * RMAX * s * (o.dL ? o.dL(i) : 1);
-      if (L > 48.6) L = 48.6;
-      var a = BASE.ang[i] + rot + (o.dA ? o.dA(i) : 0);
-      var wf = BASE.wf[i] * (o.dW ? o.dW(i) : 1);
-      var r0 = hub > 0 ? hub * 0.35 : 0;
-      out += ray(ctx, { a: a, r0: r0, r1: L, wb: WB * ws * wf, rc: Math.max(0.9, RC * ws) * (0.9 + 0.2 * (wf - 0.74) / 0.52) });
+      var a = RAYS[i][0] + rot + (o.dA ? o.dA(i) : 0);
+      var sl = s * (o.dL ? o.dL(i) : 1);
+      var sw = ws * (o.dW ? o.dW(i) : 1);
+      out += sparkRay(ctx, a, RAYS[i][1], sl, sw);
     }
     if (hub > 0) out += dot(ctx, 0, 0, hub);
     return out;

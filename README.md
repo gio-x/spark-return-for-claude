@@ -16,7 +16,7 @@ Estensione gratuita per Chrome che riporta su **claude.ai** una stellina animata
   - cliccandola, la stellina si contrae e torna com'era.
 - **Se nel sistema hai ridotto le animazioni** la stellina resta ferma.
 
-La stellina e le sue animazioni sono quelle originali di claude.ai. Il sito le contiene ancora, in un file che carica quando gli serve, e l'estensione chiede alla pagina di caricare quello stesso file dallo stesso indirizzo da cui lo carica il sito. L'estensione non contiene file, immagini o codice di claude.ai o di Anthropic. Se il file non si trova, usa una stellina di riserva disegnata da zero per questo progetto. A risposta finita lascia al suo posto la stellina ferma del sito, con il suo fumetto originale, le sue risposte ai clic e il suo sobbalzo. Se il sito non la mostra, ne disegna una sua, con messaggi scritti da zero.
+La stellina e le sue animazioni sono quelle originali di claude.ai. Il sito le contiene ancora, in un file che carica quando gli serve, e l'estensione chiede alla pagina di caricare quello stesso file dallo stesso indirizzo da cui lo carica il sito. L'estensione non contiene file, immagini o codice di claude.ai o di Anthropic. Se il file non si trova, usa una stellina di riserva ridisegnata per questo progetto con la stessa forma dell'originale. A risposta finita lascia al suo posto la stellina ferma del sito, con il suo fumetto originale, le sue risposte ai clic e il suo sobbalzo. Se il sito non la mostra, ne disegna una sua, con messaggi scritti da zero.
 
 ## Installazione (manuale)
 
@@ -73,7 +73,7 @@ A free Chrome extension that brings an animated spark back to **claude.ai**, lik
   - clicking makes the spark squish and pop back.
 - **If your system asks for reduced motion**, the spark stays still.
 
-The spark and its animations are claude.ai's originals. The site still ships them in a file it loads on demand, and the extension asks the page to load that same file from the same address the site uses. The extension itself contains no files, images or code from claude.ai or Anthropic. If the file cannot be found, it falls back to a spare spark drawn from scratch for this project. When the reply is done it leaves the site's own resting spark in place, with its original hover message, poke replies and wiggle. If the site does not show one, it draws its own, with messages written from scratch.
+The spark and its animations are claude.ai's originals. The site still ships them in a file it loads on demand, and the extension asks the page to load that same file from the same address the site uses. The extension itself contains no files, images or code from claude.ai or Anthropic. If the file cannot be found, it falls back to a spare spark redrawn for this project to match the original's shape. When the reply is done it leaves the site's own resting spark in place, with its original hover message, poke replies and wiggle. If the site does not show one, it draws its own, with messages written from scratch.
 
 ### Installation (manual)
 
