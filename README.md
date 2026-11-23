@@ -53,7 +53,7 @@ Claude è un marchio di Anthropic. Qui il nome serve solo a indicare il sito su 
 
 ## Licenza
 
-Codice rilasciato con licenza MIT: vedi il file `LICENSE`.
+Creato da **Gio**. Codice rilasciato con licenza MIT: vedi il file `LICENSE`.
 
 ---
 
@@ -110,4 +110,4 @@ Claude is a trademark of Anthropic. The name is used here only to say which site
 
 ### License
 
-Released under the MIT License: see the `LICENSE` file.
+Made by **Gio**. Released under the MIT License: see the `LICENSE` file.
