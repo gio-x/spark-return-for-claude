@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Spark Return for Claude",
+  "short_name": "Spark Return",
+  "version": "1.1.0",
+  "description": "Brings claude.ai's animated spark back while Claude thinks, searches and writes, and below each reply. Unofficial.",
+  "content_scripts": [
+    {
+      "matches": ["https://claude.ai/*"],
+      "js": ["spark-art.js", "spark-return.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
